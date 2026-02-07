@@ -53,7 +53,7 @@ const Footer: React.FC<FooterProps> = ({ onViewChange }) => {
           <h3 className="text-white font-bold mb-6 uppercase text-xs tracking-widest">Contact Us</h3>
           <ul className="flex flex-col gap-4 text-sm">
             <li>Gulshan-2, Dhaka, Bangladesh</li>
-            <li>Emergency: +880 1234-567890</li>
+            <li>Emergency: +880 1402552295</li>
             <li>Email: help@bloodbankbd.org</li>
           </ul>
         </div>
