@@ -26,3 +26,14 @@ export const DASHBOARD_STATS = [
   { icon: <ShieldCheck />, label: 'Successful Donations', value: '25,123', change: '+8.3%', color: 'text-green-600', bg: 'bg-green-50' },
   { icon: <Hospital />, label: 'Partner Hospitals', value: '152', change: '+5 new', color: 'text-blue-600', bg: 'bg-blue-50' },
 ];
+
+export const BANGLADESH_DISTRICTS = [
+  'Dhaka', 'Chattogram', 'Rajshahi', 'Khulna', 'Barishal', 'Sylhet', 'Rangpur', 'Mymensingh',
+  'Gazipur', 'Narayanganj', 'Cumilla', 'Bogura', 'Cox\'s Bazar', 'Feni', 'Noakhali', 'Brahmanbaria',
+  'Tangail', 'Narsingdi', 'Manikganj', 'Munshiganj', 'Faridpur', 'Gopalganj', 'Madaripur', 'Shariatpur',
+  'Kishoreganj', 'Netrokona', 'Sherpur', 'Jamalpur', 'Chandpur', 'Lakshmipur', 'Rangamati', 'Khagrachhari',
+  'Bandarban', 'Bagerhat', 'Chuadanga', 'Jashore', 'Jhenaidah', 'Magura', 'Meherpur', 'Narail', 'Satkhira',
+  'Kushtia', 'Joypurhat', 'Naogaon', 'Natore', 'Pabna', 'Sirajganj', 'Chapai Nawabganj', 'Dinajpur',
+  'Gaibandha', 'Kurigram', 'Lalmonirhat', 'Nilphamari', 'Panchagarh', 'Thakurgaon', 'Habiganj', 'Moulvibazar',
+  'Sunamganj', 'Barguna', 'Bhola', 'Jhalokati', 'Patuakhali', 'Pirojpur'
+].sort();

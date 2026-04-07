@@ -13,6 +13,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange }) => {
 
   const navLinks = [
     { id: 'home', label: 'Home' },
+    { id: 'search', label: 'Find Donors' },
     { id: 'register', label: 'Become Donor' },
     { id: 'request', label: 'Request Blood' },
   ];
@@ -22,7 +23,9 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange }) => {
       <div className="bg-slate-900 text-white text-[12px] py-1.5 px-4 hidden sm:block">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex gap-6">
-            <span className="flex items-center gap-1.5"><Phone size={12} /> Emergency: +880 1234-567890</span>
+            <a href="tel:420420" className="flex items-center gap-1.5 hover:text-red-400 transition-colors font-bold text-red-400">
+              <Phone size={12} /> Emergency Hotline: 420420
+            </a>
             <span>📧 info@bloodbankbd.org</span>
           </div>
           <button 

@@ -16,10 +16,10 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
     setLoading(true);
     // Demo logic
     setTimeout(() => {
-      if (username === 'admin' && password === 'admin123') {
+      if (username === 'superadmin' && password === 'bloodbank2026') {
         onLogin(username);
       } else {
-        alert("Try username: admin / pass: admin123");
+        alert("Invalid credentials. Please try again.");
         setLoading(false);
       }
     }, 800);
@@ -68,7 +68,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
                 <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                 <input 
                   type="text" required value={username} onChange={e => setUsername(e.target.value)}
-                  placeholder="admin"
+                  placeholder="Enter username"
                   className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl pl-14 pr-6 py-4 focus:bg-white focus:border-red-600 transition-all outline-none" 
                 />
               </div>
@@ -100,11 +100,6 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
               {loading ? "Authenticating..." : "Login to Dashboard"} <ChevronRight className="group-hover:translate-x-1 transition-transform" size={20} />
             </button>
           </form>
-
-          <div className="mt-12 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
-             <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Demo Access</p>
-             <p className="text-xs font-bold text-slate-600">admin / admin123</p>
-          </div>
         </div>
       </div>
     </div>

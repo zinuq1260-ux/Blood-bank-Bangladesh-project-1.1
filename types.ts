@@ -7,7 +7,7 @@ export interface Donor {
   bloodGroup: BloodGroup;
   phone: string;
   location: string;
-  lastDonationDate?: string;
+  lastDonationDate?: string | null;
   status: 'active' | 'inactive';
 }
 
@@ -22,4 +22,4 @@ export interface BloodRequest {
   requestedDate: string;
 }
 
-export type View = 'home' | 'register' | 'request' | 'login' | 'dashboard';
+export type View = 'home' | 'register' | 'request' | 'login' | 'dashboard' | 'search';

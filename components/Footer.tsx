@@ -33,9 +33,9 @@ const Footer: React.FC<FooterProps> = ({ onViewChange }) => {
           <h3 className="text-white font-bold mb-6 uppercase text-xs tracking-widest">Quick Links</h3>
           <ul className="flex flex-col gap-4 text-sm">
             <li><button onClick={() => onViewChange('home')} className="hover:text-red-500">Home</button></li>
+            <li><button onClick={() => onViewChange('search')} className="hover:text-red-500">Find Donors</button></li>
             <li><button onClick={() => onViewChange('register')} className="hover:text-red-500">Become a Donor</button></li>
             <li><button onClick={() => onViewChange('request')} className="hover:text-red-500">Request Blood</button></li>
-            <li><button onClick={() => onViewChange('home')} className="hover:text-red-500">About Us</button></li>
           </ul>
         </div>
 
@@ -53,7 +53,11 @@ const Footer: React.FC<FooterProps> = ({ onViewChange }) => {
           <h3 className="text-white font-bold mb-6 uppercase text-xs tracking-widest">Contact Us</h3>
           <ul className="flex flex-col gap-4 text-sm">
             <li>Gulshan-2, Dhaka, Bangladesh</li>
-            <li>Emergency: +880 1402552295</li>
+            <li>
+              <a href="tel:420420" className="text-red-400 font-bold hover:text-red-300 transition-colors">
+                Emergency Hotline: 420420
+              </a>
+            </li>
             <li>Email: help@bloodbankbd.org</li>
           </ul>
         </div>

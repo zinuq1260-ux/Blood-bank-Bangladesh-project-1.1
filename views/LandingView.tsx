@@ -1,14 +1,18 @@
 
 import React from 'react';
-import { Droplets, ChevronRight, Search, Activity } from 'lucide-react';
-import { BLOOD_GROUPS, STATS } from '../constants';
+import { Droplets, ChevronRight, Search, Activity, MapPin, Phone } from 'lucide-react';
+import { BLOOD_GROUPS, STATS, BANGLADESH_DISTRICTS } from '../constants';
 import { View } from '../types';
 
 interface LandingViewProps {
   onViewChange: (view: View) => void;
+  onSearch: (bloodGroup: string, location: string) => void;
 }
 
-const LandingView: React.FC<LandingViewProps> = ({ onViewChange }) => {
+const LandingView: React.FC<LandingViewProps> = ({ onViewChange, onSearch }) => {
+  const [bg, setBg] = React.useState('Any Blood Group');
+  const [loc, setLoc] = React.useState('');
+
   return (
     <div className="overflow-hidden">
       {/* Hero Section */}
@@ -30,7 +34,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onViewChange }) => {
                 instant matching, and 24/7 support for all blood types across 64 districts.
               </p>
               
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-8">
                 <button 
                   onClick={() => onViewChange('register')}
                   className="w-full sm:w-auto px-10 py-5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl shadow-xl shadow-red-200 transition-all active:scale-95 text-lg"
@@ -45,7 +49,17 @@ const LandingView: React.FC<LandingViewProps> = ({ onViewChange }) => {
                 </button>
               </div>
 
-              <div className="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto lg:mx-0">
+              <div className="inline-flex items-center gap-3 px-6 py-4 bg-red-50 rounded-2xl border border-red-100 mb-10">
+                <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center animate-pulse">
+                  <Phone className="text-white" size={20} />
+                </div>
+                <div className="text-left">
+                  <p className="text-[10px] font-black text-red-600 uppercase tracking-widest">24/7 Emergency Hotline</p>
+                  <a href="tel:420420" className="text-2xl font-black text-slate-900 hover:text-red-600 transition-colors">420420</a>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-8 max-w-lg mx-auto lg:mx-0">
                 {STATS.map((stat, idx) => (
                   <div key={idx} className="flex flex-col items-center lg:items-start">
                     <span className="text-3xl font-black text-red-600">{stat.value}</span>
@@ -90,7 +104,10 @@ const LandingView: React.FC<LandingViewProps> = ({ onViewChange }) => {
                   </div>
                 </div>
                 {/* Floating tags */}
-                <div className="absolute -top-6 -right-6 bg-white p-4 rounded-2xl shadow-xl border border-slate-50 z-20 flex items-center gap-3 animate-bounce">
+                <div 
+                  onClick={() => onViewChange('search')}
+                  className="absolute -top-6 -right-6 bg-white p-4 rounded-2xl shadow-xl border border-slate-50 z-20 flex items-center gap-3 animate-bounce cursor-pointer hover:scale-105 transition-transform"
+                >
                   <div className="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
                     <Search size={16} />
                   </div>
@@ -101,6 +118,50 @@ const LandingView: React.FC<LandingViewProps> = ({ onViewChange }) => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Quick Search Section */}
+      <section className="relative -mt-12 z-20 max-w-5xl mx-auto px-4">
+        <div className="bg-white rounded-[40px] shadow-2xl shadow-red-100 p-8 md:p-12 border border-red-50">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+            <div className="space-y-3">
+              <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">I am looking for</label>
+              <div className="relative">
+                <Droplets className="absolute left-4 top-1/2 -translate-y-1/2 text-red-600" size={20} />
+                <select 
+                  value={bg}
+                  onChange={(e) => setBg(e.target.value)}
+                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-red-600 focus:bg-white rounded-2xl outline-none transition-all font-bold appearance-none"
+                >
+                  <option>Any Blood Group</option>
+                  {BLOOD_GROUPS.map(bg => <option key={bg.type} value={bg.type}>{bg.type}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">In Location</label>
+              <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-red-600" size={20} />
+                <select 
+                  value={loc}
+                  onChange={(e) => setLoc(e.target.value)}
+                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-red-600 focus:bg-white rounded-2xl outline-none transition-all font-bold appearance-none"
+                >
+                  <option value="">Any Location</option>
+                  {BANGLADESH_DISTRICTS.map(district => (
+                    <option key={district} value={district}>{district}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <button 
+              onClick={() => onSearch(bg, loc)}
+              className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-black rounded-2xl shadow-xl shadow-red-100 flex items-center justify-center gap-3 transition-all active:scale-95"
+            >
+              <Search size={20} /> Search Donors
+            </button>
           </div>
         </div>
       </section>
@@ -164,6 +225,20 @@ const LandingView: React.FC<LandingViewProps> = ({ onViewChange }) => {
           </div>
         </div>
       </section>
+
+      {/* Floating Emergency Button */}
+      <a 
+        href="tel:420420" 
+        className="fixed bottom-8 right-8 z-50 flex items-center gap-3 bg-red-600 text-white px-6 py-4 rounded-full shadow-2xl shadow-red-600/40 hover:bg-red-700 hover:scale-105 transition-all animate-bounce"
+      >
+        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+          <Phone size={20} fill="currentColor" />
+        </div>
+        <div className="flex flex-col">
+          <span className="text-[10px] font-bold uppercase tracking-wider opacity-90 leading-none mb-1">Emergency</span>
+          <span className="text-xl font-black leading-none">420420</span>
+        </div>
+      </a>
     </div>
   );
 };
