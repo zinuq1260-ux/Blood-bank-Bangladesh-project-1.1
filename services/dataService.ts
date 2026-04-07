@@ -1,10 +1,5 @@
 import { Donor, BloodRequest } from '../types';
-
-/**
- * Backend API URL Configuration
- * Using relative paths as the backend is now integrated into the same server.
- */
-const API_URL = '/api'; 
+import { supabase } from '../lib/supabase';
 
 const DONORS_KEY = 'bbbd_donors';
 const REQUESTS_KEY = 'bbbd_requests';
@@ -24,21 +19,13 @@ const getLocalStorageData = <T>(key: string): T[] => {
 
 export const dataService = {
   /**
-   * Pings the backend to check if the MongoDB connection is alive.
-   * Uses a timeout to prevent long-hanging requests.
+   * Pings the backend to check if the Supabase connection is alive.
    */
   checkConnection: async (): Promise<boolean> => {
+    if (!supabase) return false;
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-      const response = await fetch(`${API_URL}/health`, { 
-        method: 'GET',
-        signal: controller.signal 
-      });
-      
-      clearTimeout(timeoutId);
-      return response.ok;
+      const { error } = await supabase.from('donors').select('id').limit(1);
+      return !error;
     } catch (error) {
       return false;
     }
@@ -46,13 +33,21 @@ export const dataService = {
 
   /**
    * Retrieves all registered donors.
-   * Prioritizes API data, falls back to LocalStorage if offline.
+   * Prioritizes Supabase data, falls back to LocalStorage if offline.
    */
   getDonors: async (): Promise<Donor[]> => {
+    if (!supabase) {
+      console.warn("Supabase not configured - Switching to LocalStorage for Donors");
+      return getLocalStorageData<Donor>(DONORS_KEY);
+    }
     try {
-      const res = await fetch(`${API_URL}/donors`);
-      if (!res.ok) throw new Error('Backend API unreachable');
-      return await res.json();
+      const { data, error } = await supabase
+        .from('donors')
+        .select('*')
+        .order('createdAt', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       console.warn("API Error - Switching to LocalStorage for Donors");
       return getLocalStorageData<Donor>(DONORS_KEY);
@@ -64,26 +59,33 @@ export const dataService = {
    * If the API is offline, saves locally to ensure no data loss during emergencies.
    */
   saveDonor: async (donorData: Omit<Donor, 'id' | 'status'>): Promise<Donor> => {
+    if (!supabase) {
+      return dataService._saveDonorLocally(donorData);
+    }
     try {
-      const res = await fetch(`${API_URL}/donors`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(donorData)
-      });
-      if (!res.ok) throw new Error('Failed to persist to MongoDB');
-      return await res.json();
+      const { data, error } = await supabase
+        .from('donors')
+        .insert([donorData])
+        .select();
+      
+      if (error) throw error;
+      return data[0];
     } catch (error) {
       console.info("API failure - Performing Local Fallback Save for Donor");
-      const existingDonors = await dataService.getDonors();
-      const newDonor: Donor = {
-        ...donorData,
-        id: `D-${Math.floor(Math.random() * 90000) + 10000}`,
-        status: 'active'
-      };
-      const updatedList = [newDonor, ...existingDonors];
-      localStorage.setItem(DONORS_KEY, JSON.stringify(updatedList));
-      return newDonor;
+      return dataService._saveDonorLocally(donorData);
     }
+  },
+
+  _saveDonorLocally: async (donorData: Omit<Donor, 'id' | 'status'>): Promise<Donor> => {
+    const existingDonors = await dataService.getDonors();
+    const newDonor: Donor = {
+      ...donorData,
+      id: `D-${Math.floor(Math.random() * 90000) + 10000}`,
+      status: 'active'
+    };
+    const updatedList = [newDonor, ...existingDonors];
+    localStorage.setItem(DONORS_KEY, JSON.stringify(updatedList));
+    return newDonor;
   },
 
   /**
@@ -91,10 +93,18 @@ export const dataService = {
    * Seamlessly handles offline states via LocalStorage.
    */
   getRequests: async (): Promise<BloodRequest[]> => {
+    if (!supabase) {
+      console.warn("Supabase not configured - Switching to LocalStorage for Requests");
+      return getLocalStorageData<BloodRequest>(REQUESTS_KEY);
+    }
     try {
-      const res = await fetch(`${API_URL}/requests`);
-      if (!res.ok) throw new Error('Backend API unreachable');
-      return await res.json();
+      const { data, error } = await supabase
+        .from('blood_requests')
+        .select('*')
+        .order('requestedDate', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       console.warn("API Error - Switching to LocalStorage for Requests");
       return getLocalStorageData<BloodRequest>(REQUESTS_KEY);
@@ -105,27 +115,34 @@ export const dataService = {
    * Submits a blood request to the server or LocalStorage.
    */
   saveRequest: async (requestData: Omit<BloodRequest, 'id' | 'status' | 'requestedDate'>): Promise<BloodRequest> => {
+    if (!supabase) {
+      return dataService._saveRequestLocally(requestData);
+    }
     try {
-      const res = await fetch(`${API_URL}/requests`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestData)
-      });
-      if (!res.ok) throw new Error('Failed to persist request to MongoDB');
-      return await res.json();
+      const { data, error } = await supabase
+        .from('blood_requests')
+        .insert([requestData])
+        .select();
+      
+      if (error) throw error;
+      return data[0];
     } catch (error) {
       console.info("API failure - Performing Local Fallback Save for Request");
-      const existingRequests = await dataService.getRequests();
-      const newRequest: BloodRequest = {
-        ...requestData,
-        id: `REQ-${Math.floor(Math.random() * 90000) + 10000}`,
-        status: 'pending',
-        requestedDate: new Date().toISOString()
-      };
-      const updatedList = [newRequest, ...existingRequests];
-      localStorage.setItem(REQUESTS_KEY, JSON.stringify(updatedList));
-      return newRequest;
+      return dataService._saveRequestLocally(requestData);
     }
+  },
+
+  _saveRequestLocally: async (requestData: Omit<BloodRequest, 'id' | 'status' | 'requestedDate'>): Promise<BloodRequest> => {
+    const existingRequests = await dataService.getRequests();
+    const newRequest: BloodRequest = {
+      ...requestData,
+      id: `REQ-${Math.floor(Math.random() * 90000) + 10000}`,
+      status: 'pending',
+      requestedDate: new Date().toISOString()
+    };
+    const updatedList = [newRequest, ...existingRequests];
+    localStorage.setItem(REQUESTS_KEY, JSON.stringify(updatedList));
+    return newRequest;
   },
 
   /**
