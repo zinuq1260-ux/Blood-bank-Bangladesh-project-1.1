@@ -152,10 +152,16 @@ export const dataService = {
     const donors = await dataService.getDonors();
     const requests = await dataService.getRequests();
     
+    const bloodGroupCounts = donors.reduce((acc, donor) => {
+      acc[donor.bloodGroup] = (acc[donor.bloodGroup] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
     return {
       totalDonors: donors.length,
       pendingRequests: requests.filter(r => r.status === 'pending').length,
       successfulDonations: Math.floor(donors.length * 1.5 + 5), // Enhanced simulation for demo
+      bloodGroupCounts
     };
   }
 };

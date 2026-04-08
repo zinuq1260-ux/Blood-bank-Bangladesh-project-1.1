@@ -30,6 +30,15 @@ const DonorSearchView: React.FC<DonorSearchViewProps> = ({ onBack, initialBloodG
   }, []);
 
   useEffect(() => {
+    if (initialBloodGroup) {
+      setSelectedBloodGroup(initialBloodGroup as BloodGroup | 'All');
+    }
+    if (initialLocation) {
+      setSearchLocation(initialLocation);
+    }
+  }, [initialBloodGroup, initialLocation]);
+
+  useEffect(() => {
     let result = donors;
 
     const bloodGroupToFilter = selectedBloodGroup === 'Any Blood Group' ? 'All' : selectedBloodGroup;

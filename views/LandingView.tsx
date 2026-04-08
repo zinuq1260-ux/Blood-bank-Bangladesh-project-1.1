@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { Droplets, ChevronRight, Search, Activity, MapPin, Phone } from 'lucide-react';
-import { BLOOD_GROUPS, STATS, BANGLADESH_DISTRICTS } from '../constants';
+import { BLOOD_GROUPS, BANGLADESH_DISTRICTS } from '../constants';
 import { View } from '../types';
+import { dataService } from '../services/dataService';
 
 interface LandingViewProps {
   onViewChange: (view: View) => void;
@@ -12,6 +13,20 @@ interface LandingViewProps {
 const LandingView: React.FC<LandingViewProps> = ({ onViewChange, onSearch }) => {
   const [bg, setBg] = React.useState('Any Blood Group');
   const [loc, setLoc] = React.useState('');
+  const [stats, setStats] = React.useState({ 
+    totalDonors: 0, 
+    pendingRequests: 0, 
+    successfulDonations: 0, 
+    bloodGroupCounts: {} as Record<string, number> 
+  });
+
+  React.useEffect(() => {
+    const fetchStats = async () => {
+      const data = await dataService.getStats();
+      setStats(data);
+    };
+    fetchStats();
+  }, []);
 
   return (
     <div className="overflow-hidden">
@@ -60,7 +75,11 @@ const LandingView: React.FC<LandingViewProps> = ({ onViewChange, onSearch }) => 
               </div>
 
               <div className="grid grid-cols-3 gap-8 max-w-lg mx-auto lg:mx-0">
-                {STATS.map((stat, idx) => (
+                {[
+                  { label: 'Active Donors', value: stats.totalDonors.toLocaleString() },
+                  { label: 'Lives Saved', value: stats.successfulDonations.toLocaleString() },
+                  { label: 'Districts', value: '64' },
+                ].map((stat, idx) => (
                   <div key={idx} className="flex flex-col items-center lg:items-start">
                     <span className="text-3xl font-black text-red-600">{stat.value}</span>
                     <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">{stat.label}</span>
@@ -113,7 +132,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onViewChange, onSearch }) => 
                   </div>
                   <div>
                     <p className="text-[10px] text-slate-400 font-bold uppercase">Emergency Search</p>
-                    <p className="text-sm font-bold text-slate-900">Found 3 Donors Nearby</p>
+                    <p className="text-sm font-bold text-slate-900">Found {stats.totalDonors > 0 ? 'Donors' : '0'} Nearby</p>
                   </div>
                 </div>
               </div>
@@ -180,7 +199,10 @@ const LandingView: React.FC<LandingViewProps> = ({ onViewChange, onSearch }) => 
             {BLOOD_GROUPS.map((group, idx) => (
               <div 
                 key={idx} 
-                onClick={() => onViewChange('request')}
+                onClick={() => {
+                  onSearch(group.type, '');
+                  onViewChange('search');
+                }}
                 className="group relative bg-white border-2 border-slate-50 rounded-[32px] p-8 text-center transition-all hover:border-red-600 hover:shadow-2xl hover:shadow-red-100 cursor-pointer active:scale-95"
               >
                 <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -188,7 +210,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onViewChange, onSearch }) => 
                 </div>
                 <h3 className="text-5xl font-serif font-black text-red-600 mb-4 group-hover:scale-110 transition-transform">{group.type}</h3>
                 <div className="space-y-1">
-                  <p className="text-xl font-black text-slate-900">{group.count}</p>
+                  <p className="text-xl font-black text-slate-900">{(stats.bloodGroupCounts[group.type] || 0).toLocaleString()}</p>
                   <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Active Donors</p>
                 </div>
               </div>

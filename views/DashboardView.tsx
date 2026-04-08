@@ -185,6 +185,49 @@ const DashboardView: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
                </div>
             </div>
           )}
+
+          {activeTab === 'requests' && (
+            <div className="bg-white rounded-[40px] shadow-sm border border-slate-100 overflow-hidden">
+               <div className="overflow-x-auto">
+                  <table className="w-full">
+                     <thead className="bg-slate-50 text-slate-400 text-[10px] font-black uppercase">
+                        <tr>
+                           <th className="px-8 py-5 text-left">ID</th>
+                           <th className="px-8 py-5 text-left">Patient Name</th>
+                           <th className="px-8 py-5 text-left">Blood Group</th>
+                           <th className="px-8 py-5 text-left">Units</th>
+                           <th className="px-8 py-5 text-left">Hospital</th>
+                           <th className="px-8 py-5 text-left">Urgency</th>
+                           <th className="px-8 py-5 text-left">Status</th>
+                        </tr>
+                     </thead>
+                     <tbody className="divide-y divide-slate-50">
+                        {requests.map((req, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                             <td className="px-8 py-6 text-sm font-bold text-slate-400">{req.id}</td>
+                             <td className="px-8 py-6 font-bold text-slate-900">{req.patientName}</td>
+                             <td className="px-8 py-6"><span className="px-4 py-1.5 bg-red-50 text-red-600 rounded-xl font-black text-xs border border-red-100">{req.bloodGroup}</span></td>
+                             <td className="px-8 py-6 text-sm text-slate-500 font-medium">{req.units}</td>
+                             <td className="px-8 py-6 text-sm text-slate-500 font-medium">{req.hospital}</td>
+                             <td className="px-8 py-6 text-sm text-slate-500 font-medium capitalize">{req.urgency}</td>
+                             <td className="px-8 py-6">
+                                <span className={`px-4 py-1.5 rounded-xl font-black text-xs border ${req.status === 'pending' ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-green-50 text-green-600 border-green-100'}`}>
+                                   {req.status}
+                                </span>
+                             </td>
+                          </tr>
+                        ))}
+                     </tbody>
+                  </table>
+                  {requests.length === 0 && (
+                    <div className="text-center py-24">
+                       <ClipboardList className="mx-auto text-slate-200 mb-4" size={48} />
+                       <p className="text-slate-400 font-bold">No blood requests found in database.</p>
+                    </div>
+                  )}
+               </div>
+            </div>
+          )}
         </div>
       </main>
     </div>

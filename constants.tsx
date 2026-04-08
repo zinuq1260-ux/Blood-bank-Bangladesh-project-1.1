@@ -3,15 +3,15 @@ import React from 'react';
 import { Droplets, Users, Heart, Hospital, Activity, ShieldCheck, Clock, MapPin } from 'lucide-react';
 import { BloodGroup } from './types';
 
-export const BLOOD_GROUPS: { type: BloodGroup; count: string }[] = [
-  { type: 'A+', count: '12,543' },
-  { type: 'A-', count: '1,287' },
-  { type: 'B+', count: '15,321' },
-  { type: 'B-', count: '982' },
-  { type: 'O+', count: '18,765' },
-  { type: 'O-', count: '856' },
-  { type: 'AB+', count: '3,421' },
-  { type: 'AB-', count: '423' },
+export const BLOOD_GROUPS: { type: BloodGroup; count: number }[] = [
+  { type: 'A+', count: 12543 },
+  { type: 'A-', count: 1287 },
+  { type: 'B+', count: 15321 },
+  { type: 'B-', count: 982 },
+  { type: 'O+', count: 18765 },
+  { type: 'O-', count: 856 },
+  { type: 'AB+', count: 3421 },
+  { type: 'AB-', count: 423 },
 ];
 
 export const STATS = [
