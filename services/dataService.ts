@@ -1,8 +1,9 @@
-import { Donor, BloodRequest } from '../types';
+import { Donor, BloodRequest, EmergencyInfo } from '../types';
 import { supabase } from '../lib/supabase';
 
 const DONORS_KEY = 'bbbd_donors';
 const REQUESTS_KEY = 'bbbd_requests';
+const EMERGENCY_KEY = 'bbbd_emergency_contacts';
 
 /**
  * Helper to safely parse JSON from LocalStorage
@@ -148,7 +149,7 @@ export const dataService = {
   /**
    * Updates the status of a blood request.
    */
-  updateRequestStatus: async (id: string, status: 'pending' | 'finding donor' | 'processing' | 'sorry' | 'donation done'): Promise<void> => {
+  updateRequestStatus: async (id: string, status: 'pending' | 'finding donor' | 'processing' | 'sorry' | 'donation done' | 'waiting'): Promise<void> => {
     if (!supabase) {
       const requests = getLocalStorageData<BloodRequest>(REQUESTS_KEY);
       const updatedRequests = requests.map(r => r.id === id ? { ...r, status } : r);
@@ -169,6 +170,99 @@ export const dataService = {
   },
 
   /**
+   * Retrieves all emergency contacts.
+   */
+  getEmergencyContacts: async (): Promise<EmergencyInfo[]> => {
+    if (!supabase) {
+      return getLocalStorageData<EmergencyInfo>(EMERGENCY_KEY);
+    }
+    try {
+      const { data, error } = await supabase
+        .from('emergency_info')
+        .select('*')
+        .order('createdAt', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.warn("API Error - Switching to LocalStorage for Emergency Contacts");
+      return getLocalStorageData<EmergencyInfo>(EMERGENCY_KEY);
+    }
+  },
+
+  /**
+   * Saves a new emergency contact.
+   */
+  saveEmergencyContact: async (contactData: Omit<EmergencyInfo, 'id'>): Promise<EmergencyInfo> => {
+    if (!supabase) {
+      const contacts = getLocalStorageData<EmergencyInfo>(EMERGENCY_KEY);
+      const newContact: EmergencyInfo = {
+        ...contactData,
+        id: Date.now().toString()
+      };
+      localStorage.setItem(EMERGENCY_KEY, JSON.stringify([...contacts, newContact]));
+      return newContact;
+    }
+    try {
+      const { data, error } = await supabase
+        .from('emergency_info')
+        .insert([contactData])
+        .select();
+      
+      if (error) throw error;
+      return data[0];
+    } catch (error) {
+      console.error("Failed to save emergency contact:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Updates an emergency contact.
+   */
+  updateEmergencyContact: async (id: string, contactData: Omit<EmergencyInfo, 'id'>): Promise<void> => {
+    if (!supabase) {
+      const contacts = getLocalStorageData<EmergencyInfo>(EMERGENCY_KEY);
+      const updated = contacts.map(c => c.id === id ? { ...c, ...contactData } : c);
+      localStorage.setItem(EMERGENCY_KEY, JSON.stringify(updated));
+      return;
+    }
+    try {
+      const { error } = await supabase
+        .from('emergency_info')
+        .update(contactData)
+        .eq('id', id);
+      
+      if (error) throw error;
+    } catch (error) {
+      console.error("Failed to update emergency contact:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Deletes an emergency contact.
+   */
+  deleteEmergencyContact: async (id: string): Promise<void> => {
+    if (!supabase) {
+      const contacts = getLocalStorageData<EmergencyInfo>(EMERGENCY_KEY);
+      localStorage.setItem(EMERGENCY_KEY, JSON.stringify(contacts.filter(c => c.id !== id)));
+      return;
+    }
+    try {
+      const { error } = await supabase
+        .from('emergency_info')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+    } catch (error) {
+      console.error("Failed to delete emergency contact:", error);
+      throw error;
+    }
+  },
+
+  /**
    * Aggregates stats from available data sources for the dashboard.
    */
   getStats: async () => {
@@ -184,7 +278,7 @@ export const dataService = {
     return {
       totalDonors: donors.length,
       pendingRequests: requests.filter(r => r.status === 'pending').length,
-      successfulDonations: Math.floor(donors.length * 1.5 + 5), // Enhanced simulation for demo
+      successfulDonations: requests.filter(r => r.status === 'donation done').length,
       totalVisitors,
       bloodGroupCounts
     };

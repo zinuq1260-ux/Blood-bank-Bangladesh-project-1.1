@@ -16,14 +16,16 @@ const DonorSearchView: React.FC<DonorSearchViewProps> = ({ onBack, initialBloodG
   const [filteredDonors, setFilteredDonors] = useState<Donor[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchLocation, setSearchLocation] = useState(initialLocation || '');
-  const [selectedBloodGroup, setSelectedBloodGroup] = useState<BloodGroup | 'All'>((initialBloodGroup as BloodGroup) || 'All');
+  const [selectedBloodGroup, setSelectedBloodGroup] = useState<BloodGroup | 'All'>(() => {
+    if (initialBloodGroup === 'Any Blood Group' || !initialBloodGroup) return 'All';
+    return initialBloodGroup as BloodGroup;
+  });
 
   useEffect(() => {
     const fetchDonors = async () => {
       setLoading(true);
       const allDonors = await dataService.getDonors();
       setDonors(allDonors);
-      setFilteredDonors(allDonors);
       setLoading(false);
     };
     fetchDonors();
@@ -31,7 +33,7 @@ const DonorSearchView: React.FC<DonorSearchViewProps> = ({ onBack, initialBloodG
 
   useEffect(() => {
     if (initialBloodGroup) {
-      setSelectedBloodGroup(initialBloodGroup as BloodGroup | 'All');
+      setSelectedBloodGroup(initialBloodGroup === 'Any Blood Group' ? 'All' : initialBloodGroup as BloodGroup);
     }
     if (initialLocation) {
       setSearchLocation(initialLocation);
@@ -41,10 +43,8 @@ const DonorSearchView: React.FC<DonorSearchViewProps> = ({ onBack, initialBloodG
   useEffect(() => {
     let result = donors;
 
-    const bloodGroupToFilter = selectedBloodGroup === 'Any Blood Group' ? 'All' : selectedBloodGroup;
-
-    if (bloodGroupToFilter !== 'All') {
-      result = result.filter(d => d.bloodGroup === bloodGroupToFilter);
+    if (selectedBloodGroup !== 'All') {
+      result = result.filter(d => d.bloodGroup === selectedBloodGroup);
     }
 
     if (searchLocation.trim()) {

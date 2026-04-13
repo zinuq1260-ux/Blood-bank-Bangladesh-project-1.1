@@ -16,7 +16,7 @@ const Footer: React.FC<FooterProps> = ({ onViewChange }) => {
             <div className="w-8 h-8 bg-red-600 rounded-tr-xl rounded-bl-xl rotate-45 flex items-center justify-center">
               <Droplets className="text-white -rotate-45" size={18} />
             </div>
-            <h2 className="text-xl font-black text-white">BloodBank<span className="text-red-500">BD</span></h2>
+            <h2 className="text-xl font-black text-white">DonorBank<span className="text-red-500">Bd</span></h2>
           </div>
           <p className="text-sm leading-relaxed mb-6">
             Bangladesh's premier digital blood donation network connecting thousands of donors with people in need 24/7.
@@ -74,7 +74,7 @@ const Footer: React.FC<FooterProps> = ({ onViewChange }) => {
       </div>
       
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500">
-        <p>© 2026 BloodBankBD. All rights reserved.</p>
+        <p>© 2026 DonorBankBd. All rights reserved.</p>
         <p className="mt-4 md:mt-0 font-medium">Developed by <span className="text-slate-300">(Team Spy)</span></p>
       </div>
     </footer>

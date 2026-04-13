@@ -7,8 +7,6 @@ import {
 import { dataService } from '../services/dataService';
 import { Donor, BloodRequest, EmergencyInfo } from '../types';
 
-const EMERGENCY_KEY = 'bbbd_emergency_contacts';
-
 const DashboardView: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
@@ -31,14 +29,16 @@ const DashboardView: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
       const online = await dataService.checkConnection();
       setIsDbOnline(online);
 
-      const [donorList, requestList, dashboardStats] = await Promise.all([
+      const [donorList, requestList, emergencyList, dashboardStats] = await Promise.all([
         dataService.getDonors(),
         dataService.getRequests(),
+        dataService.getEmergencyContacts(),
         dataService.getStats()
       ]);
       
       setDonors(donorList || []);
       setRequests(requestList || []);
+      setContacts(emergencyList || []);
       setStats(dashboardStats || { totalDonors: 0, pendingRequests: 0, successfulDonations: 0, totalVisitors: 0 });
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
@@ -53,38 +53,32 @@ const DashboardView: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    const stored = localStorage.getItem(EMERGENCY_KEY);
-    if (stored) setContacts(JSON.parse(stored));
-  }, []);
-
-  const saveContacts = (newContacts: EmergencyInfo[]) => {
-    setContacts(newContacts);
-    localStorage.setItem(EMERGENCY_KEY, JSON.stringify(newContacts));
-  };
-
-  const handleAddOrUpdate = (e: React.FormEvent) => {
+  const handleAddOrUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !phone) return;
 
-    if (editingId) {
-      const updatedContacts = contacts.map(c => c.id === editingId ? { ...c, name, phone } : c);
-      saveContacts(updatedContacts);
+    try {
+      if (editingId) {
+        await dataService.updateEmergencyContact(editingId, { name, phone });
+      } else {
+        await dataService.saveEmergencyContact({ name, phone });
+      }
+      setName('');
+      setPhone('');
       setEditingId(null);
-    } else {
-      const newContact: EmergencyInfo = {
-        id: Date.now().toString(),
-        name,
-        phone
-      };
-      saveContacts([...contacts, newContact]);
+      loadData(); // Refresh list
+    } catch (error) {
+      console.error("Failed to save emergency contact:", error);
     }
-    setName('');
-    setPhone('');
   };
 
-  const handleDelete = (id: string) => {
-    saveContacts(contacts.filter(c => c.id !== id));
+  const handleDelete = async (id: string) => {
+    try {
+      await dataService.deleteEmergencyContact(id);
+      loadData(); // Refresh list
+    } catch (error) {
+      console.error("Failed to delete emergency contact:", error);
+    }
   };
 
   const handleEdit = (contact: EmergencyInfo) => {
@@ -99,12 +93,6 @@ const DashboardView: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
     { id: 'requests', label: 'Blood Requests', icon: <ClipboardList size={20} /> },
     { id: 'emergency', label: 'Emergency Contacts', icon: <Phone size={20} /> },
   ];
-
-  useEffect(() => {
-    loadData();
-    const interval = setInterval(loadData, 30000); // Auto-refresh every 30s
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 flex overflow-hidden">

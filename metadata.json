@@ -1,5 +1,5 @@
 {
-  "name": "BloodBankBD - AI Powered Life Saver",
+  "name": "DonorBankBd",
   "description": "A comprehensive blood donation management platform for Bangladesh featuring AI-powered donor matching and a professional administrative dashboard.",
   "requestFramePermissions": [
     "geolocation"

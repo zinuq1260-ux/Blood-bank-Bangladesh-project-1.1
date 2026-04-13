@@ -20,7 +20,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange }) => {
 
   const handleReport = () => {
     const email = "teamspydonorline@gmail.com";
-    const subject = encodeURIComponent("Report/Complaint - BloodBankBD");
+    const subject = encodeURIComponent("Report/Complaint - DonorBankBd");
     const body = encodeURIComponent("Please describe your issue or report here:\n\n");
     window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
   };
@@ -51,7 +51,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange }) => {
           </div>
           <div>
             <h1 className="text-xl sm:text-2xl font-black tracking-tight leading-none">
-              BloodBank<span className="text-red-600">BD</span>
+              DonorBank<span className="text-red-600">Bd</span>
             </h1>
             <p className="text-[10px] text-slate-500 font-bold tracking-widest uppercase">Save Lives Together</p>
           </div>

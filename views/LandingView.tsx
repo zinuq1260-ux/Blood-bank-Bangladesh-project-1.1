@@ -2,7 +2,7 @@
 import React from 'react';
 import { Droplets, ChevronRight, Search, Activity, MapPin, Phone, X } from 'lucide-react';
 import { BLOOD_GROUPS, BANGLADESH_DISTRICTS } from '../constants';
-import { View } from '../types';
+import { View, EmergencyInfo } from '../types';
 import { dataService } from '../services/dataService';
 
 interface LandingViewProps {
@@ -14,7 +14,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onViewChange, onSearch }) => 
   const [bg, setBg] = React.useState('Any Blood Group');
   const [loc, setLoc] = React.useState('');
   const [showEmergencyModal, setShowEmergencyModal] = React.useState(false);
-  const [emergencyContacts, setEmergencyContacts] = React.useState<any[]>([]);
+  const [emergencyContacts, setEmergencyContacts] = React.useState<EmergencyInfo[]>([]);
   const [stats, setStats] = React.useState({ 
     totalDonors: 0, 
     pendingRequests: 0, 
@@ -23,15 +23,21 @@ const LandingView: React.FC<LandingViewProps> = ({ onViewChange, onSearch }) => 
   });
 
   React.useEffect(() => {
-    const fetchStats = async () => {
-      const data = await dataService.getStats();
-      setStats(data);
+    const fetchData = async () => {
+      try {
+        const [statsData, contactsData] = await Promise.all([
+          dataService.getStats(),
+          dataService.getEmergencyContacts()
+        ]);
+        setStats(statsData);
+        setEmergencyContacts(contactsData);
+      } catch (error) {
+        console.error("Failed to fetch landing page data:", error);
+      }
     };
-    fetchStats();
     
-    const stored = localStorage.getItem('bbbd_emergency_contacts');
-    if (stored) setEmergencyContacts(JSON.parse(stored));
-
+    fetchData();
+    
     const handleOpenModal = () => setShowEmergencyModal(true);
     window.addEventListener('open-emergency-modal', handleOpenModal);
     return () => window.removeEventListener('open-emergency-modal', handleOpenModal);
