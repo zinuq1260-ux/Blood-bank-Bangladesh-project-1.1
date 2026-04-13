@@ -9,6 +9,7 @@ import DashboardView from './views/DashboardView';
 import DonorSearchView from './views/DonorSearchView';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import { dataService } from './services/dataService';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>(() => {
@@ -19,6 +20,17 @@ const App: React.FC = () => {
     return localStorage.getItem('bbbd_isAdmin') === 'true';
   });
   const [initialSearch, setInitialSearch] = useState<{ bloodGroup?: string, location?: string }>({});
+
+  useEffect(() => {
+    const recordVisit = async () => {
+      const hasVisited = sessionStorage.getItem('bbbd_has_visited_session');
+      if (!hasVisited) {
+        await dataService.recordVisit();
+        sessionStorage.setItem('bbbd_has_visited_session', 'true');
+      }
+    };
+    recordVisit();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('bbbd_currentView', currentView);
@@ -43,7 +55,7 @@ const App: React.FC = () => {
   };
 
   if (currentView === 'dashboard') {
-    return <DashboardView onLogout={() => { setIsAdmin(false); setCurrentView('home'); }} />;
+    return isAdmin ? <DashboardView onLogout={() => { setIsAdmin(false); setCurrentView('home'); }} /> : <LoginView onLogin={() => { setIsAdmin(true); setCurrentView('dashboard'); }} />;
   }
 
   return (

@@ -2,10 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Users, ClipboardList, Package, 
-  LogOut, Menu, X, Activity, Clock, ShieldCheck, Hospital, Loader2, Database, Wifi, WifiOff
+  LogOut, Menu, X, Activity, Clock, ShieldCheck, Hospital, Loader2, Database, Wifi, WifiOff, Phone, Trash2, Edit2, Plus
 } from 'lucide-react';
 import { dataService } from '../services/dataService';
-import { Donor, BloodRequest } from '../types';
+import { Donor, BloodRequest, EmergencyInfo } from '../types';
+
+const EMERGENCY_KEY = 'bbbd_emergency_contacts';
 
 const DashboardView: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -14,7 +16,13 @@ const DashboardView: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
   const [isDbOnline, setIsDbOnline] = useState(false);
   const [donors, setDonors] = useState<Donor[]>([]);
   const [requests, setRequests] = useState<BloodRequest[]>([]);
-  const [stats, setStats] = useState({ totalDonors: 0, pendingRequests: 0, successfulDonations: 0 });
+  const [stats, setStats] = useState({ totalDonors: 0, pendingRequests: 0, successfulDonations: 0, totalVisitors: 0 });
+  
+  // Emergency Contacts State
+  const [contacts, setContacts] = useState<EmergencyInfo[]>([]);
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const loadData = async () => {
     setIsLoading(true);
@@ -31,7 +39,7 @@ const DashboardView: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
       
       setDonors(donorList || []);
       setRequests(requestList || []);
-      setStats(dashboardStats || { totalDonors: 0, pendingRequests: 0, successfulDonations: 0 });
+      setStats(dashboardStats || { totalDonors: 0, pendingRequests: 0, successfulDonations: 0, totalVisitors: 0 });
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
     } finally {
@@ -45,16 +53,63 @@ const DashboardView: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const stored = localStorage.getItem(EMERGENCY_KEY);
+    if (stored) setContacts(JSON.parse(stored));
+  }, []);
+
+  const saveContacts = (newContacts: EmergencyInfo[]) => {
+    setContacts(newContacts);
+    localStorage.setItem(EMERGENCY_KEY, JSON.stringify(newContacts));
+  };
+
+  const handleAddOrUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !phone) return;
+
+    if (editingId) {
+      const updatedContacts = contacts.map(c => c.id === editingId ? { ...c, name, phone } : c);
+      saveContacts(updatedContacts);
+      setEditingId(null);
+    } else {
+      const newContact: EmergencyInfo = {
+        id: Date.now().toString(),
+        name,
+        phone
+      };
+      saveContacts([...contacts, newContact]);
+    }
+    setName('');
+    setPhone('');
+  };
+
+  const handleDelete = (id: string) => {
+    saveContacts(contacts.filter(c => c.id !== id));
+  };
+
+  const handleEdit = (contact: EmergencyInfo) => {
+    setName(contact.name);
+    setPhone(contact.phone);
+    setEditingId(contact.id);
+  };
+
   const menuItems = [
     { id: 'overview', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { id: 'donors', label: 'Donors', icon: <Users size={20} /> },
     { id: 'requests', label: 'Blood Requests', icon: <ClipboardList size={20} /> },
+    { id: 'emergency', label: 'Emergency Contacts', icon: <Phone size={20} /> },
   ];
+
+  useEffect(() => {
+    loadData();
+    const interval = setInterval(loadData, 30000); // Auto-refresh every 30s
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 flex overflow-hidden">
       {/* Sidebar */}
-      <aside className={`bg-slate-900 flex flex-col transition-all duration-300 z-50 ${isSidebarOpen ? 'w-64' : 'w-20'}`}>
+      <aside className={`bg-slate-900 flex flex-col transition-all duration-300 z-50 fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'} md:relative md:translate-x-0 ${isSidebarOpen ? 'md:w-64' : 'md:w-20'}`}>
         <div className="p-6 flex items-center gap-3">
           <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center shrink-0">
              <Activity className="text-white" size={18} />
@@ -64,7 +119,7 @@ const DashboardView: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
         
         <nav className="flex-grow px-3 py-6 space-y-2">
           {menuItems.map(item => (
-            <button key={item.id} onClick={() => setActiveTab(item.id)} className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === item.id ? 'bg-red-600 text-white shadow-lg shadow-red-900/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
+            <button key={item.id} onClick={() => { setActiveTab(item.id); if (window.innerWidth < 768) setIsSidebarOpen(false); }} className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === item.id ? 'bg-red-600 text-white shadow-lg shadow-red-900/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
               {item.icon} {isSidebarOpen && item.label}
             </button>
           ))}
@@ -80,6 +135,7 @@ const DashboardView: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
            </button>
         </div>
       </aside>
+
 
       {/* Main Content */}
       <main className="flex-grow flex flex-col h-screen overflow-y-auto">
@@ -107,8 +163,9 @@ const DashboardView: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
         <div className="p-8">
           {activeTab === 'overview' && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 {[
+                  { label: 'Total Visitors', value: stats.totalVisitors || 0, color: 'text-blue-600', icon: <Activity /> },
                   { label: 'Total Donors', value: stats.totalDonors, color: 'text-red-600', icon: <Users /> },
                   { label: 'Pending Requests', value: stats.pendingRequests, color: 'text-orange-600', icon: <Clock /> },
                   { label: 'Success Cases', value: stats.successfulDonations, color: 'text-green-600', icon: <ShieldCheck /> },
@@ -153,6 +210,7 @@ const DashboardView: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
                         <tr>
                            <th className="px-8 py-5 text-left">ID</th>
                            <th className="px-8 py-5 text-left">Donor Name</th>
+                           <th className="px-8 py-5 text-left">Phone</th>
                            <th className="px-8 py-5 text-left">Blood Group</th>
                            <th className="px-8 py-5 text-left">Location</th>
                            <th className="px-8 py-5 text-left">Last Donation</th>
@@ -164,6 +222,7 @@ const DashboardView: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
                           <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
                              <td className="px-8 py-6 text-sm font-bold text-slate-400">{donor.id}</td>
                              <td className="px-8 py-6 font-bold text-slate-900">{donor.fullName}</td>
+                             <td className="px-8 py-6 text-sm text-slate-500 font-medium">{donor.phone}</td>
                              <td className="px-8 py-6"><span className="px-4 py-1.5 bg-red-50 text-red-600 rounded-xl font-black text-xs border border-red-100">{donor.bloodGroup}</span></td>
                              <td className="px-8 py-6 text-sm text-slate-500 font-medium">{donor.location}</td>
                              <td className="px-8 py-6 text-sm text-slate-500 font-medium">{donor.lastDonationDate ? new Date(donor.lastDonationDate).toLocaleDateString() : 'N/A'}</td>
@@ -197,6 +256,7 @@ const DashboardView: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
                            <th className="px-8 py-5 text-left">Blood Group</th>
                            <th className="px-8 py-5 text-left">Units</th>
                            <th className="px-8 py-5 text-left">Hospital</th>
+                           <th className="px-8 py-5 text-left">Contact Phone</th>
                            <th className="px-8 py-5 text-left">Urgency</th>
                            <th className="px-8 py-5 text-left">Status</th>
                         </tr>
@@ -209,11 +269,24 @@ const DashboardView: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
                              <td className="px-8 py-6"><span className="px-4 py-1.5 bg-red-50 text-red-600 rounded-xl font-black text-xs border border-red-100">{req.bloodGroup}</span></td>
                              <td className="px-8 py-6 text-sm text-slate-500 font-medium">{req.units}</td>
                              <td className="px-8 py-6 text-sm text-slate-500 font-medium">{req.hospital}</td>
+                             <td className="px-8 py-6 text-sm text-slate-500 font-medium">{req.contactPhone}</td>
                              <td className="px-8 py-6 text-sm text-slate-500 font-medium capitalize">{req.urgency}</td>
                              <td className="px-8 py-6">
-                                <span className={`px-4 py-1.5 rounded-xl font-black text-xs border ${req.status === 'pending' ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-green-50 text-green-600 border-green-100'}`}>
-                                   {req.status}
-                                </span>
+                                <select 
+                                  value={req.status}
+                                  onChange={async (e) => {
+                                    await dataService.updateRequestStatus(req.id, e.target.value as any);
+                                    loadData();
+                                  }}
+                                  className="px-4 py-1.5 rounded-xl font-black text-xs border bg-slate-50 outline-none cursor-pointer"
+                                >
+                                  <option value="pending">Pending</option>
+                                  <option value="waiting">Waiting</option>
+                                  <option value="finding donor">Finding Donor</option>
+                                  <option value="processing">Processing</option>
+                                  <option value="sorry">Sorry</option>
+                                  <option value="donation done">Donation Done</option>
+                                </select>
                              </td>
                           </tr>
                         ))}
@@ -226,6 +299,55 @@ const DashboardView: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
                     </div>
                   )}
                </div>
+            </div>
+          )}
+
+          {activeTab === 'emergency' && (
+            <div className="max-w-2xl mx-auto">
+              <form onSubmit={handleAddOrUpdate} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <input 
+                    type="text" 
+                    placeholder="Name" 
+                    value={name} 
+                    onChange={(e) => setName(e.target.value)}
+                    className="p-3 rounded-lg border border-slate-200 outline-none focus:border-red-600"
+                    required
+                  />
+                  <input 
+                    type="tel" 
+                    placeholder="Phone Number" 
+                    value={phone} 
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="p-3 rounded-lg border border-slate-200 outline-none focus:border-red-600"
+                    required
+                  />
+                </div>
+                <button type="submit" className="mt-4 w-full bg-red-600 text-white py-3 rounded-lg font-bold hover:bg-red-700 transition-colors flex items-center justify-center gap-2">
+                  <Plus size={20} /> {editingId ? 'Update Contact' : 'Add Contact'}
+                </button>
+              </form>
+
+              <div className="space-y-4">
+                {contacts.map(contact => (
+                  <div key={contact.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                      <p className="font-bold text-slate-900">{contact.name}</p>
+                      <a href={`tel:${contact.phone}`} className="text-red-600 flex items-center gap-1 text-sm font-semibold">
+                        <Phone size={14} /> {contact.phone}
+                      </a>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => handleEdit(contact)} className="p-2 text-slate-400 hover:text-red-600 transition-colors">
+                        <Edit2 size={18} />
+                      </button>
+                      <button onClick={() => handleDelete(contact.id)} className="p-2 text-slate-400 hover:text-red-600 transition-colors">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

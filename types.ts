@@ -18,8 +18,15 @@ export interface BloodRequest {
   units: number;
   hospital: string;
   urgency: 'emergency' | 'urgent' | 'scheduled';
-  status: 'pending' | 'approved' | 'completed' | 'cancelled';
+  contactPhone: string;
+  status: 'pending' | 'finding donor' | 'processing' | 'sorry' | 'donation done' | 'waiting';
   requestedDate: string;
+}
+
+export interface EmergencyInfo {
+  id: string;
+  name: string;
+  phone: string;
 }
 
 export type View = 'home' | 'register' | 'request' | 'login' | 'dashboard' | 'search';

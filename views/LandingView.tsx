@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Droplets, ChevronRight, Search, Activity, MapPin, Phone } from 'lucide-react';
+import { Droplets, ChevronRight, Search, Activity, MapPin, Phone, X } from 'lucide-react';
 import { BLOOD_GROUPS, BANGLADESH_DISTRICTS } from '../constants';
 import { View } from '../types';
 import { dataService } from '../services/dataService';
@@ -13,6 +13,8 @@ interface LandingViewProps {
 const LandingView: React.FC<LandingViewProps> = ({ onViewChange, onSearch }) => {
   const [bg, setBg] = React.useState('Any Blood Group');
   const [loc, setLoc] = React.useState('');
+  const [showEmergencyModal, setShowEmergencyModal] = React.useState(false);
+  const [emergencyContacts, setEmergencyContacts] = React.useState<any[]>([]);
   const [stats, setStats] = React.useState({ 
     totalDonors: 0, 
     pendingRequests: 0, 
@@ -26,10 +28,44 @@ const LandingView: React.FC<LandingViewProps> = ({ onViewChange, onSearch }) => 
       setStats(data);
     };
     fetchStats();
+    
+    const stored = localStorage.getItem('bbbd_emergency_contacts');
+    if (stored) setEmergencyContacts(JSON.parse(stored));
+
+    const handleOpenModal = () => setShowEmergencyModal(true);
+    window.addEventListener('open-emergency-modal', handleOpenModal);
+    return () => window.removeEventListener('open-emergency-modal', handleOpenModal);
   }, []);
 
   return (
     <div className="overflow-hidden">
+      {/* Emergency Modal */}
+      {showEmergencyModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-black">Emergency Contacts</h3>
+              <button onClick={() => setShowEmergencyModal(false)} className="p-1 hover:bg-slate-100 rounded-full">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+              {emergencyContacts.length > 0 ? emergencyContacts.map((c, i) => (
+                <div key={i} className="p-3 bg-slate-50 rounded-lg flex justify-between items-center">
+                  <div>
+                    <p className="font-bold">{c.name}</p>
+                    <p className="text-sm text-red-600">{c.phone}</p>
+                  </div>
+                  <a href={`tel:${c.phone}`} className="p-2 bg-red-100 text-red-600 rounded-full">
+                    <Phone size={16} />
+                  </a>
+                </div>
+              )) : <p className="text-center text-slate-500 py-4">No contacts found.</p>}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="relative pt-10 pb-20 sm:pt-20 sm:pb-32 bg-gradient-to-br from-red-50 via-white to-red-50/30 overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-red-600/5 -skew-x-12 translate-x-1/4 pointer-events-none" />
@@ -62,16 +98,6 @@ const LandingView: React.FC<LandingViewProps> = ({ onViewChange, onSearch }) => 
                 >
                   Request Blood
                 </button>
-              </div>
-
-              <div className="inline-flex items-center gap-3 px-6 py-4 bg-red-50 rounded-2xl border border-red-100 mb-10">
-                <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center animate-pulse">
-                  <Phone className="text-white" size={20} />
-                </div>
-                <div className="text-left">
-                  <p className="text-[10px] font-black text-red-600 uppercase tracking-widest">24/7 Emergency Hotline</p>
-                  <a href="tel:420420" className="text-2xl font-black text-slate-900 hover:text-red-600 transition-colors">420420</a>
-                </div>
               </div>
 
               <div className="grid grid-cols-3 gap-8 max-w-lg mx-auto lg:mx-0">
@@ -238,28 +264,30 @@ const LandingView: React.FC<LandingViewProps> = ({ onViewChange, onSearch }) => 
             >
               Start Saving Lives
             </button>
-            <button 
-              onClick={() => onViewChange('request')}
-              className="w-full sm:w-auto px-12 py-5 bg-red-700 text-white font-black rounded-2xl hover:bg-red-800 transition-all active:scale-95 text-lg"
-            >
-              Learn More
-            </button>
+            <div className="flex flex-col items-center gap-4">
+              <button 
+                onClick={() => onViewChange('request')}
+                className="w-full sm:w-auto px-12 py-5 bg-red-700 text-white font-black rounded-2xl hover:bg-red-800 transition-all active:scale-95 text-lg"
+              >
+                Learn More
+              </button>
+              <button 
+                onClick={() => setShowEmergencyModal(true)}
+                className="w-full sm:w-auto px-12 py-5 bg-slate-900 text-white font-black rounded-2xl hover:bg-slate-800 transition-all active:scale-95 text-lg"
+              >
+                Emergency Information
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Floating Emergency Button */}
       <a 
-        href="tel:420420" 
-        className="fixed bottom-8 right-8 z-50 flex items-center gap-3 bg-red-600 text-white px-6 py-4 rounded-full shadow-2xl shadow-red-600/40 hover:bg-red-700 hover:scale-105 transition-all animate-bounce"
+        href="tel:01980484770" 
+        className="fixed bottom-8 right-8 z-50 w-16 h-16 bg-red-600 text-white rounded-full shadow-2xl shadow-red-600/40 hover:bg-red-700 hover:scale-105 transition-all flex items-center justify-center animate-bounce"
       >
-        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
-          <Phone size={20} fill="currentColor" />
-        </div>
-        <div className="flex flex-col">
-          <span className="text-[10px] font-bold uppercase tracking-wider opacity-90 leading-none mb-1">Emergency</span>
-          <span className="text-xl font-black leading-none">420420</span>
-        </div>
+        <Phone size={32} fill="currentColor" />
       </a>
     </div>
   );

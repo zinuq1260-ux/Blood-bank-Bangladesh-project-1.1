@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Droplets, Menu, X, Phone, Lock } from 'lucide-react';
+import { Droplets, Menu, X, Phone, Lock, AlertTriangle } from 'lucide-react';
 import { View } from '../types';
 
 interface NavbarProps {
@@ -18,15 +18,22 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange }) => {
     { id: 'request', label: 'Request Blood' },
   ];
 
+  const handleReport = () => {
+    const email = "teamspydonorline@gmail.com";
+    const subject = encodeURIComponent("Report/Complaint - BloodBankBD");
+    const body = encodeURIComponent("Please describe your issue or report here:\n\n");
+    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+  };
+
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-100">
       <div className="bg-slate-900 text-white text-[12px] py-1.5 px-4 hidden sm:block">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex gap-6">
-            <a href="tel:420420" className="flex items-center gap-1.5 hover:text-red-400 transition-colors font-bold text-red-400">
-              <Phone size={12} /> Emergency Hotline: 420420
+            <a href="tel:01980484770" className="flex items-center gap-1.5 hover:text-red-400 transition-colors font-bold text-red-400">
+              <Phone size={18} />
             </a>
-            <span>📧 info@bloodbankbd.org</span>
+            <span>📧 teamspydonorline@gmail.com</span>
           </div>
           <button 
             onClick={() => onViewChange('login')}
@@ -64,6 +71,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange }) => {
               {currentView === link.id && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-red-600 rounded-full" />}
             </button>
           ))}
+          
           <button 
             onClick={() => onViewChange('register')}
             className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-red-200 transition-all active:scale-95"
@@ -73,9 +81,11 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange }) => {
         </div>
 
         {/* Mobile Menu Btn */}
-        <button className="md:hidden text-slate-600" onClick={() => setIsOpen(!isOpen)}>
-          {isOpen ? <X size={28} /> : <Menu size={28} />}
-        </button>
+        <div className="flex items-center gap-4 md:hidden">
+          <button className="text-slate-600" onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Nav */}
@@ -92,6 +102,12 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange }) => {
               {link.label}
             </button>
           ))}
+          <button 
+            onClick={() => { handleReport(); setIsOpen(false); }}
+            className="text-left text-lg font-bold p-3 rounded-lg text-orange-600 bg-orange-50"
+          >
+            Report Issue
+          </button>
           <button 
             onClick={() => { onViewChange('login'); setIsOpen(false); }}
             className="text-left text-lg font-bold p-3 rounded-lg text-slate-700 border border-slate-200"

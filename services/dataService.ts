@@ -146,11 +146,35 @@ export const dataService = {
   },
 
   /**
+   * Updates the status of a blood request.
+   */
+  updateRequestStatus: async (id: string, status: 'pending' | 'finding donor' | 'processing' | 'sorry' | 'donation done'): Promise<void> => {
+    if (!supabase) {
+      const requests = getLocalStorageData<BloodRequest>(REQUESTS_KEY);
+      const updatedRequests = requests.map(r => r.id === id ? { ...r, status } : r);
+      localStorage.setItem(REQUESTS_KEY, JSON.stringify(updatedRequests));
+      return;
+    }
+    try {
+      const { error } = await supabase
+        .from('blood_requests')
+        .update({ status })
+        .eq('id', id);
+      
+      if (error) throw error;
+    } catch (error) {
+      console.error("API Error - Could not update request status:", error);
+      throw error;
+    }
+  },
+
+  /**
    * Aggregates stats from available data sources for the dashboard.
    */
   getStats: async () => {
     const donors = await dataService.getDonors();
     const requests = await dataService.getRequests();
+    const totalVisitors = await dataService.getVisitorCount();
     
     const bloodGroupCounts = donors.reduce((acc, donor) => {
       acc[donor.bloodGroup] = (acc[donor.bloodGroup] || 0) + 1;
@@ -161,7 +185,44 @@ export const dataService = {
       totalDonors: donors.length,
       pendingRequests: requests.filter(r => r.status === 'pending').length,
       successfulDonations: Math.floor(donors.length * 1.5 + 5), // Enhanced simulation for demo
+      totalVisitors,
       bloodGroupCounts
     };
+  },
+
+  /**
+   * Records a new visit to the site.
+   */
+  recordVisit: async (): Promise<void> => {
+    if (!supabase) {
+      const currentCount = parseInt(localStorage.getItem('bbbd_visitors') || '0', 10);
+      localStorage.setItem('bbbd_visitors', (currentCount + 1).toString());
+      return;
+    }
+    try {
+      await supabase.from('visitors').insert([{}]);
+    } catch (error) {
+      console.error("Failed to record visit:", error);
+    }
+  },
+
+  /**
+   * Gets the total number of visitors.
+   */
+  getVisitorCount: async (): Promise<number> => {
+    if (!supabase) {
+      return parseInt(localStorage.getItem('bbbd_visitors') || '0', 10);
+    }
+    try {
+      const { count, error } = await supabase
+        .from('visitors')
+        .select('*', { count: 'exact', head: true });
+      
+      if (error) throw error;
+      return count || 0;
+    } catch (error) {
+      console.error("Failed to get visitor count:", error);
+      return parseInt(localStorage.getItem('bbbd_visitors') || '0', 10);
+    }
   }
 };

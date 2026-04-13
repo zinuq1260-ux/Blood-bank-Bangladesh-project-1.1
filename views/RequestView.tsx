@@ -1,8 +1,8 @@
 
-import React, { useState } from 'react';
-import { AlertCircle, Heart, Loader2, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { AlertCircle, Heart, Loader2, CheckCircle, Phone } from 'lucide-react';
 import { dataService } from '../services/dataService';
-import { BloodGroup } from '../types';
+import { BloodGroup, BloodRequest } from '../types';
 
 interface RequestViewProps {
   onComplete: () => void;
@@ -11,6 +11,8 @@ interface RequestViewProps {
 const RequestView: React.FC<RequestViewProps> = ({ onComplete }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [searchPhone, setSearchPhone] = useState('');
+  const [myRequests, setMyRequests] = useState<BloodRequest[]>([]);
   const [formData, setFormData] = useState({
     patientName: '',
     bloodGroup: '' as BloodGroup,
@@ -19,6 +21,19 @@ const RequestView: React.FC<RequestViewProps> = ({ onComplete }) => {
     hospital: '',
     contactPhone: ''
   });
+
+  const fetchAllRequests = async () => {
+    const requests = await dataService.getRequests();
+    setMyRequests(requests);
+  };
+
+  useEffect(() => {
+    fetchAllRequests();
+  }, []);
+
+  const filteredRequests = searchPhone.trim() === '' 
+    ? [] 
+    : myRequests.filter(req => req.contactPhone && req.contactPhone.includes(searchPhone));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +44,8 @@ const RequestView: React.FC<RequestViewProps> = ({ onComplete }) => {
         bloodGroup: formData.bloodGroup,
         units: parseInt(formData.units),
         hospital: formData.hospital,
-        urgency: formData.urgency
+        urgency: formData.urgency,
+        contactPhone: formData.contactPhone
       });
       setIsSuccess(true);
       setTimeout(() => onComplete(), 2000);
@@ -56,7 +72,7 @@ const RequestView: React.FC<RequestViewProps> = ({ onComplete }) => {
 
   return (
     <div className="bg-slate-50 min-h-screen py-12 px-4">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto space-y-8">
         <div className="bg-white rounded-[40px] shadow-2xl shadow-slate-200 p-8 sm:p-12 border border-slate-100">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-full font-bold text-xs mb-8">
             <AlertCircle size={14} /> Emergency Submission
@@ -64,6 +80,7 @@ const RequestView: React.FC<RequestViewProps> = ({ onComplete }) => {
           <h1 className="text-3xl font-serif font-black text-slate-900 mb-8">Blood Request</h1>
           
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* ... form fields ... */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Patient Name</label>
               <input 
@@ -144,6 +161,33 @@ const RequestView: React.FC<RequestViewProps> = ({ onComplete }) => {
               {isSubmitting ? "Transmitting to Database..." : "Submit Emergency Request"}
             </button>
           </form>
+        </div>
+
+        <div className="bg-white rounded-[40px] shadow-lg p-8 border border-slate-100">
+          <h2 className="text-xl font-black text-slate-900 mb-6">My Requests</h2>
+          <div className="flex gap-2 mb-4">
+            <input 
+              type="tel" 
+              placeholder="Enter phone number to search" 
+              value={searchPhone} 
+              onChange={e => setSearchPhone(e.target.value)}
+              className="flex-grow bg-slate-50 border-2 border-slate-50 rounded-2xl px-5 py-3 focus:bg-white focus:border-red-600 transition-all outline-none" 
+            />
+          </div>
+          <div className="space-y-4">
+            {filteredRequests.map(req => (
+              <div key={req.id} className="p-4 bg-slate-50 rounded-2xl flex justify-between items-center">
+                <div>
+                  <p className="font-bold">{req.patientName} ({req.bloodGroup})</p>
+                  <p className="text-sm text-slate-500">{req.hospital}</p>
+                </div>
+                <span className={`px-3 py-1 rounded-full font-black text-[10px] uppercase ${req.status === 'donation done' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                  {req.status}
+                </span>
+              </div>
+            ))}
+            {filteredRequests.length === 0 && <p className="text-center text-slate-500">No requests found for this number.</p>}
+          </div>
         </div>
       </div>
     </div>

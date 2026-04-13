@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Droplets, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
+import { Droplets, Facebook, Twitter, Instagram, Linkedin, Phone } from 'lucide-react';
 import { View } from '../types';
 
 interface FooterProps {
@@ -52,20 +52,30 @@ const Footer: React.FC<FooterProps> = ({ onViewChange }) => {
         <div>
           <h3 className="text-white font-bold mb-6 uppercase text-xs tracking-widest">Contact Us</h3>
           <ul className="flex flex-col gap-4 text-sm">
-            <li>Gulshan-2, Dhaka, Bangladesh</li>
+            <li>Uttara-7, Dhaka, Bangladesh</li>
             <li>
-              <a href="tel:420420" className="text-red-400 font-bold hover:text-red-300 transition-colors">
-                Emergency Hotline: 420420
+              <a href="tel:01980484770" className="text-red-400 font-bold hover:text-red-300 transition-colors">
+                <Phone size={18} />
               </a>
             </li>
-            <li>Email: help@bloodbankbd.org</li>
+            <li>Email: teamspydonorline@gmail.com</li>
+            <li>
+              <button onClick={() => window.dispatchEvent(new CustomEvent('open-emergency-modal'))} className="text-red-500 font-bold hover:text-red-400 transition-colors underline">
+                Emergency Information
+              </button>
+            </li>
+            <li className="pt-2 border-t border-slate-800">
+              <span className="text-xs text-slate-500 block mb-1">Developers:</span>
+              Golam Rabbi Ahosan Zinuq (01402552295)<br />
+              Mirajul islam Mehedi (01980-484770)
+            </li>
           </ul>
         </div>
       </div>
       
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500">
         <p>© 2026 BloodBankBD. All rights reserved.</p>
-        <p className="mt-4 md:mt-0 font-medium">Developed by <span className="text-slate-300">Team Spy</span></p>
+        <p className="mt-4 md:mt-0 font-medium">Developed by <span className="text-slate-300">(Team Spy)</span></p>
       </div>
     </footer>
   );
