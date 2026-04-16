@@ -1,5 +1,8 @@
 {
   "name": "donorbankbd",
+  "description": "Blood donation management platform for Bangladesh",
+  "author": "DonorBankBd Team",
+  "license": "MIT",
   "private": true,
   "version": "0.0.0",
   "type": "module",

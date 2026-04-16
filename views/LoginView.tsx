@@ -13,28 +13,34 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    setTimeout(() => {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    try {
       if (step === 1) {
+        // Basic auth check
         if (username === 'spy@donorbank' && password === 'donor@bank999') {
           setStep(2);
-          setLoading(false);
         } else {
           alert("Invalid credentials. Please try again.");
-          setLoading(false);
         }
       } else {
+        // MFA check
         if (secretKey === '12601051') {
           onLogin(username);
         } else {
           alert("Invalid secret key. Please try again.");
-          setLoading(false);
         }
       }
-    }, 800);
+    } catch (err) {
+      console.error("Auth error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

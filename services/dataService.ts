@@ -1,13 +1,12 @@
 import { Donor, BloodRequest, EmergencyInfo } from '../types';
 import { supabase } from '../lib/supabase';
 
+// LocalStorage keys
 const DONORS_KEY = 'bbbd_donors';
 const REQUESTS_KEY = 'bbbd_requests';
 const EMERGENCY_KEY = 'bbbd_emergency_contacts';
 
-/**
- * Helper to safely parse JSON from LocalStorage
- */
+// Helper to safely parse JSON from LocalStorage
 const getLocalStorageData = <T>(key: string): T[] => {
   try {
     const stored = localStorage.getItem(key);
@@ -19,9 +18,7 @@ const getLocalStorageData = <T>(key: string): T[] => {
 };
 
 export const dataService = {
-  /**
-   * Pings the backend to check if the Supabase connection is alive.
-   */
+  // Check if Supabase connection is alive
   checkConnection: async (): Promise<boolean> => {
     if (!supabase) return false;
     try {
@@ -32,10 +29,7 @@ export const dataService = {
     }
   },
 
-  /**
-   * Retrieves all registered donors.
-   * Prioritizes Supabase data, falls back to LocalStorage if offline.
-   */
+  // Get all donors (Supabase with LocalStorage fallback)
   getDonors: async (): Promise<Donor[]> => {
     if (!supabase) {
       console.warn("Supabase not configured - Switching to LocalStorage for Donors");
@@ -55,10 +49,7 @@ export const dataService = {
     }
   },
 
-  /**
-   * Saves a new donor record.
-   * If the API is offline, saves locally to ensure no data loss during emergencies.
-   */
+  // Save new donor record
   saveDonor: async (donorData: Omit<Donor, 'id' | 'status'>): Promise<Donor> => {
     if (!supabase) {
       return dataService._saveDonorLocally(donorData);
@@ -89,10 +80,7 @@ export const dataService = {
     return newDonor;
   },
 
-  /**
-   * Retrieves all blood requests.
-   * Seamlessly handles offline states via LocalStorage.
-   */
+  // Get all blood requests
   getRequests: async (): Promise<BloodRequest[]> => {
     if (!supabase) {
       console.warn("Supabase not configured - Switching to LocalStorage for Requests");
@@ -112,9 +100,7 @@ export const dataService = {
     }
   },
 
-  /**
-   * Submits a blood request to the server or LocalStorage.
-   */
+  // Submit blood request
   saveRequest: async (requestData: Omit<BloodRequest, 'id' | 'status' | 'requestedDate'>): Promise<BloodRequest> => {
     if (!supabase) {
       return dataService._saveRequestLocally(requestData);
@@ -146,9 +132,7 @@ export const dataService = {
     return newRequest;
   },
 
-  /**
-   * Updates the status of a blood request.
-   */
+  // Update request status
   updateRequestStatus: async (id: string, status: 'pending' | 'finding donor' | 'processing' | 'sorry' | 'donation done' | 'waiting'): Promise<void> => {
     if (!supabase) {
       const requests = getLocalStorageData<BloodRequest>(REQUESTS_KEY);
@@ -169,9 +153,7 @@ export const dataService = {
     }
   },
 
-  /**
-   * Retrieves all emergency contacts.
-   */
+  // Get emergency contacts
   getEmergencyContacts: async (): Promise<EmergencyInfo[]> => {
     if (!supabase) {
       return getLocalStorageData<EmergencyInfo>(EMERGENCY_KEY);
@@ -190,9 +172,7 @@ export const dataService = {
     }
   },
 
-  /**
-   * Saves a new emergency contact.
-   */
+  // Save emergency contact
   saveEmergencyContact: async (contactData: Omit<EmergencyInfo, 'id'>): Promise<EmergencyInfo> => {
     if (!supabase) {
       const contacts = getLocalStorageData<EmergencyInfo>(EMERGENCY_KEY);
@@ -217,9 +197,7 @@ export const dataService = {
     }
   },
 
-  /**
-   * Updates an emergency contact.
-   */
+  // Update emergency contact
   updateEmergencyContact: async (id: string, contactData: Omit<EmergencyInfo, 'id'>): Promise<void> => {
     if (!supabase) {
       const contacts = getLocalStorageData<EmergencyInfo>(EMERGENCY_KEY);
@@ -240,9 +218,7 @@ export const dataService = {
     }
   },
 
-  /**
-   * Deletes an emergency contact.
-   */
+  // Delete emergency contact
   deleteEmergencyContact: async (id: string): Promise<void> => {
     if (!supabase) {
       const contacts = getLocalStorageData<EmergencyInfo>(EMERGENCY_KEY);
@@ -262,9 +238,7 @@ export const dataService = {
     }
   },
 
-  /**
-   * Aggregates stats from available data sources for the dashboard.
-   */
+  // Aggregate stats for dashboard
   getStats: async () => {
     const donors = await dataService.getDonors();
     const requests = await dataService.getRequests();
@@ -284,9 +258,7 @@ export const dataService = {
     };
   },
 
-  /**
-   * Records a new visit to the site.
-   */
+  // Record site visit
   recordVisit: async (): Promise<void> => {
     if (!supabase) {
       const currentCount = parseInt(localStorage.getItem('bbbd_visitors') || '0', 10);
@@ -300,9 +272,7 @@ export const dataService = {
     }
   },
 
-  /**
-   * Gets the total number of visitors.
-   */
+  // Get total visitor count
   getVisitorCount: async (): Promise<number> => {
     if (!supabase) {
       return parseInt(localStorage.getItem('bbbd_visitors') || '0', 10);

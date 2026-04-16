@@ -45,7 +45,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onViewChange, onSearch }) => 
 
   return (
     <div className="overflow-hidden">
-      {/* Emergency Modal */}
+      {/* Emergency Contacts Modal */}
       {showEmergencyModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
@@ -122,7 +122,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onViewChange, onSearch }) => 
 
             <div className="flex-1 relative">
               <div className="relative w-full aspect-square max-w-md mx-auto">
-                {/* Decorative Elements */}
+                {/* Visual elements for the hero section */}
                 <div className="absolute inset-0 bg-red-100 rounded-full blur-3xl opacity-50 animate-pulse" />
                 <div className="relative z-10 w-full h-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 p-8">
                   <div className="h-full flex flex-col justify-center items-center gap-6">
@@ -154,7 +154,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onViewChange, onSearch }) => 
                     </div>
                   </div>
                 </div>
-                {/* Floating tags */}
+                {/* Quick search floating tag */}
                 <div 
                   onClick={() => onViewChange('search')}
                   className="absolute -top-6 -right-6 bg-white p-4 rounded-2xl shadow-xl border border-slate-50 z-20 flex items-center gap-3 animate-bounce cursor-pointer hover:scale-105 transition-transform"

@@ -41,7 +41,7 @@ const App: React.FC = () => {
     localStorage.setItem('bbbd_isAdmin', String(isAdmin));
   }, [isAdmin]);
 
-  // Simple state-based routing
+  // Handle view switching
   const renderView = () => {
     switch (currentView) {
       case 'home': return <LandingView onViewChange={setCurrentView} onSearch={(bg, loc) => { setInitialSearch({ bloodGroup: bg, location: loc }); setCurrentView('search'); }} />;
