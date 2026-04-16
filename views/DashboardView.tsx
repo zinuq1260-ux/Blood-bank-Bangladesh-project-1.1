@@ -124,7 +124,6 @@ const DashboardView: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
         </div>
       </aside>
 
-
       {/* Main Content */}
       <main className="flex-grow flex flex-col h-screen overflow-y-auto">
         <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100 px-8 h-20 flex items-center justify-between">
