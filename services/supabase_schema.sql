@@ -4,13 +4,13 @@ DROP TABLE IF EXISTS emergency_info;
 DROP TABLE IF EXISTS blood_requests;
 DROP TABLE IF EXISTS donors;
 
--- Create Visitors Table
+-- Create Visitors Table1
 CREATE TABLE visitors (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   "visitedAt" TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Create Donors Table
+-- Create Donors Table2
 CREATE TABLE donors (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   "fullName" TEXT NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE donors (
   "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Create Blood Requests Table
+-- Create Blood Requests Table3
 CREATE TABLE blood_requests (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   "patientName" TEXT NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE blood_requests (
   "requestedDate" TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Create Emergency Info Table
+-- Create Emergency Info Table4
 CREATE TABLE emergency_info (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL,
