@@ -66,7 +66,7 @@ const Footer: React.FC<FooterProps> = ({ onViewChange }) => {
             </li>
             <li className="pt-2 border-t border-slate-800">
               <span className="text-xs text-slate-500 block mb-1">Developers:</span>
-              Golam Rabbi Ahosan Zinuq (01402552295)<br />
+              Golam Rabbi Ahosan Zinuq (01402-552295)<br />
               Mirajul islam Mehedi (01980-484770)
             </li>
           </ul>
@@ -75,7 +75,7 @@ const Footer: React.FC<FooterProps> = ({ onViewChange }) => {
       
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500">
         <p>© 2026 DonorBankBd. All rights reserved.</p>
-        <p className="mt-4 md:mt-0 font-medium">Developed by <span className="text-slate-300">(Team Spy)</span></p>
+        <p className="mt-4 md:mt-0 font-medium">Developed by <span className="text-slate-300">Team Spy</span></p>
       </div>
     </footer>
   );
