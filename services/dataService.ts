@@ -28,7 +28,6 @@ export const dataService = {
       return false;
     }
   },
-
   // Get all donors (Supabase with LocalStorage fallback)
   getDonors: async (): Promise<Donor[]> => {
     if (!supabase) {
