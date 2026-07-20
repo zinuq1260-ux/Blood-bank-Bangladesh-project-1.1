@@ -28,7 +28,7 @@ A professional blood donation management platform for Bangladesh. This platform 
 ## Developers
 
 - **Golam Rabbi Ahosan Zinuq**
-- **Mirajul Islam Mehedi**
+  
 
 ## License
 
